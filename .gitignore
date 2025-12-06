@@ -1,0 +1,11 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/SecurityProject/HinshitsuSecurity/bin/Debug/net8.0
+/SecurityProject/HinshitsuSecurity/.vs/ProjectEvaluation
+/SecurityProject/HinshitsuSecurityModels/bin/Debug/net8.0
+/SecurityProject/HinshitsuSecurityService/bin/Debug/net8.0
+/SecurityProject/HinshitsuSecurityService/obj
+/SecurityProject/HinshitsuSecurity/appsettings.json
+/SecurityProject/HinshitsuSecurity/appsettings.Development.json

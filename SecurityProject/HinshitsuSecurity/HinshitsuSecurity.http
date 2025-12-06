@@ -1,0 +1,6 @@
+@HinshitsuSecurity_HostAddress = http://localhost:5138
+
+GET {{HinshitsuSecurity_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

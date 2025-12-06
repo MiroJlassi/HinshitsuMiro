@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/HinshitsuSecurityModels/obj
+/HinshitsuSecurity/obj
+/HinshitsuSecurity/.vs/HinshitsuSecurity
+/.vs
