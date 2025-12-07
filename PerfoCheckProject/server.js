@@ -16,7 +16,7 @@ app.use(express.json());
 const resultsDir = path.join(process.cwd(), 'results');
 fs.mkdir(resultsDir, { recursive: true }).catch(console.error);
 
-app.post("/analyze-ai", async (req, res) => {
+app.post("/analyze", async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: "URL is required" });
 
