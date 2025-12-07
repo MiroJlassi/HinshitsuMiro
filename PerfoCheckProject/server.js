@@ -16,6 +16,15 @@ app.use(express.json());
 const resultsDir = path.join(process.cwd(), 'results');
 fs.mkdir(resultsDir, { recursive: true }).catch(console.error);
 
+app.get("/", (req, res) => {
+  res.json({ 
+    status: "running",
+    service: "Lighthouse Performance Analyzer",
+    endpoints: {
+      analyze: "POST /analyze - Analyze a URL with Lighthouse"
+    }
+  });
+});
 app.post("/analyze", async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: "URL is required" });
