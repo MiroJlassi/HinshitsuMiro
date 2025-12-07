@@ -9,3 +9,8 @@
 /SecurityProject/HinshitsuSecurityService/obj
 /SecurityProject/HinshitsuSecurity/appsettings.json
 /SecurityProject/HinshitsuSecurity/appsettings.Development.json
+
+# Node modules
+node_modules/
+**/node_modules/
+PerfoCheckProject/.env
