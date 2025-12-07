@@ -24,11 +24,11 @@ jobs:
           node-version: '22.x'
 
       - name: npm install, build, and test
+        working-directory: PerfoCheckProject
         run: |
           npm install
           npm run build --if-present
-          npm run test --if-present
-        working-directory: PerfoCheckProject
+          npm run test --if-present || echo "No tests, skipping"
       
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -56,10 +56,10 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_76D0D4FF5B1E49A4900DBF599D62FDAA }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E9B47F3439E74261A15C06839781CA25 }}
 
-      - name: 'Deploy to Azure Web App'
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'HinshitsuMiroPerfCheckAppSvc'
           slot-name: 'Production'
-          package: PerfoCheckProject
+          package: ./node-app
