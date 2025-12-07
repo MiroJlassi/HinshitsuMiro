@@ -5,8 +5,8 @@ import path from "path";
 
 // Services
 import { runLighthouse } from "./Services/lighthouseService.js"; 
-import { convertToToon } from "./services/toonService.js";
-import { GptService } from "./services/gptService.js";
+import { convertToToon } from "./Services/toonService.js";
+import { GptService } from "./Services/gptService.js";
 
 dotenv.config();
 
