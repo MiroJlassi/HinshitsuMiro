@@ -15,3 +15,8 @@ node_modules/
 **/node_modules/
 PerfoCheckProject/.env
 /VisualCheckProject/.env
+/HinshitsuService/HinshitsuWebApis/.vs/HinshitsuWebApis
+/HinshitsuService/HinshitsuWebApis/obj
+/HinshitsuService/HinshitsuWebApis/bin/Debug/net8.0
+/HinshitsuService/HinshitsuWebApis/appsettings.json
+/HinshitsuService/HinshitsuWebApis/appsettings.Development.json
