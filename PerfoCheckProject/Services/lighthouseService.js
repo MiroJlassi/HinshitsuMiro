@@ -2,7 +2,20 @@ import lighthouse from "lighthouse";
 import { launch } from "chrome-launcher";
 
 export async function runLighthouse(url) {
-  const chrome = await launch({ chromeFlags: ["--headless", "--no-sandbox"] });
+  let chrome;
+  
+  try {
+    chrome = await launch({ 
+      chromeFlags: ["--headless", "--no-sandbox", "--disable-dev-shm-usage"],
+      handleSIGINT: false
+    });
+  } catch (chromeError) {
+    throw new Error(
+      `Chrome/Chromium not available in this environment. ` +
+      `Lighthouse requires a headless browser. ` +
+      `Platform: ${process.platform}, Error: ${chromeError.message}`
+    );
+  }
 
   const options = {
     logLevel: "info",
@@ -11,60 +24,74 @@ export async function runLighthouse(url) {
     port: chrome.port
   };
 
-  const runnerResult = await lighthouse(url, options);
-  await chrome.kill();
-  const lhr = runnerResult.lhr;
-  const fullReport = {
-    url: lhr.finalUrl,
-    fetchTime: lhr.fetchTime,
-    userAgent: lhr.userAgent,
-    scores: {
-      performance: lhr.categories.performance.score,
-      accessibility: lhr.categories.accessibility.score,
-      seo: lhr.categories.seo.score,
-      bestPractices: lhr.categories["best-practices"].score
-    },
-    coreWebVitals: {
-      lcp: lhr.audits["largest-contentful-paint"]?.numericValue ?? null,
-      fid: lhr.audits["max-potential-fid"]?.numericValue ?? null,
-      cls: lhr.audits["cumulative-layout-shift"]?.numericValue ?? null,
-      tti: lhr.audits["interactive"]?.numericValue ?? null,
-      fcp: lhr.audits["first-contentful-paint"]?.numericValue ?? null,
-      tbt: lhr.audits["total-blocking-time"]?.numericValue ?? null
-    },
-    performanceDetails: {
-      speedIndex: lhr.audits["speed-index"]?.numericValue ?? null,
-      timeToInteractive: lhr.audits["interactive"]?.numericValue ?? null,
-      firstMeaningfulPaint: lhr.audits["first-meaningful-paint"]?.numericValue ?? null,
-      serverResponseTime: lhr.audits["server-response-time"]?.numericValue ?? null
-    },
-    accessibilityIssues: extractAuditItems(lhr, "accessibility"),
-    seoIssues: extractAuditItems(lhr, "seo"),
-    bestPracticesIssues: extractAuditItems(lhr, "best-practices"),
-    opportunities: (lhr.categories.performance.auditRefs || [])
-      .filter(a => a.group === "load-opportunities" || a.group === "perf-opportunities")
-      .map(a => {
-        const audit = lhr.audits[a.id];
-        return {
-          id: audit.id,
-          title: audit.title,
-          description: audit.description,
-          savingsMs: audit.details?.overallSavingsMs ?? 0,
-          savingsBytes: audit.details?.overallSavingsBytes ?? 0
-        };
-      }),
-    diagnostics: {
-      mainThreadWork: lhr.audits["mainthread-work-breakdown"]?.details?.items ?? [],
-      bootupTime: lhr.audits["bootup-time"]?.details?.items ?? [],
-      networkRequests: lhr.audits["network-requests"]?.details?.items ?? []
-    },
-    raw: {
-      categories: Object.keys(lhr.categories || {}),
-      audits: Object.keys(lhr.audits || {})
-    }
-  };
+  try {
+    const runnerResult = await lighthouse(url, options);
+    const lhr = runnerResult.lhr;
+    
+    const fullReport = {
+      url: lhr.finalUrl,
+      fetchTime: lhr.fetchTime,
+      userAgent: lhr.userAgent,
+      scores: {
+        performance: lhr.categories.performance.score,
+        accessibility: lhr.categories.accessibility.score,
+        seo: lhr.categories.seo.score,
+        bestPractices: lhr.categories["best-practices"].score
+      },
+      coreWebVitals: {
+        lcp: lhr.audits["largest-contentful-paint"]?.numericValue ?? null,
+        fid: lhr.audits["max-potential-fid"]?.numericValue ?? null,
+        cls: lhr.audits["cumulative-layout-shift"]?.numericValue ?? null,
+        tti: lhr.audits["interactive"]?.numericValue ?? null,
+        fcp: lhr.audits["first-contentful-paint"]?.numericValue ?? null,
+        tbt: lhr.audits["total-blocking-time"]?.numericValue ?? null
+      },
+      performanceDetails: {
+        speedIndex: lhr.audits["speed-index"]?.numericValue ?? null,
+        timeToInteractive: lhr.audits["interactive"]?.numericValue ?? null,
+        firstMeaningfulPaint: lhr.audits["first-meaningful-paint"]?.numericValue ?? null,
+        serverResponseTime: lhr.audits["server-response-time"]?.numericValue ?? null
+      },
+      accessibilityIssues: extractAuditItems(lhr, "accessibility"),
+      seoIssues: extractAuditItems(lhr, "seo"),
+      bestPracticesIssues: extractAuditItems(lhr, "best-practices"),
+      opportunities: (lhr.categories.performance.auditRefs || [])
+        .filter(a => a.group === "load-opportunities" || a.group === "perf-opportunities")
+        .map(a => {
+          const audit = lhr.audits[a.id];
+          return {
+            id: audit.id,
+            title: audit.title,
+            description: audit.description,
+            savingsMs: audit.details?.overallSavingsMs ?? 0,
+            savingsBytes: audit.details?.overallSavingsBytes ?? 0
+          };
+        }),
+      diagnostics: {
+        mainThreadWork: lhr.audits["mainthread-work-breakdown"]?.details?.items ?? [],
+        bootupTime: lhr.audits["bootup-time"]?.details?.items ?? [],
+        networkRequests: lhr.audits["network-requests"]?.details?.items ?? []
+      },
+      raw: {
+        categories: Object.keys(lhr.categories || {}),
+        audits: Object.keys(lhr.audits || {})
+      }
+    };
 
-  return fullReport;
+    return fullReport;
+  } catch (lighthouseError) {
+    throw new Error(`Lighthouse analysis failed: ${lighthouseError.message}`);
+  } finally {
+    // miro here Always clean up Chrome instance
+    // limited app resources T.T
+    if (chrome) {
+      try {
+        await chrome.kill();
+      } catch (killError) {
+        console.error('Chrome cleanup error:', killError);
+      }
+    }
+  }
 }
 
 function extractAuditItems(lhr, category) {
