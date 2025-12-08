@@ -20,3 +20,9 @@ PerfoCheckProject/.env
 /HinshitsuService/HinshitsuWebApis/bin/Debug/net8.0
 /HinshitsuService/HinshitsuWebApis/appsettings.json
 /HinshitsuService/HinshitsuWebApis/appsettings.Development.json
+/.vs
+/HinshitsuService/HinshitsuWebApis/.vs/ProjectEvaluation
+/HinshitsuService/HinshitsuShared/obj
+/HinshitsuWorker/bin/Debug/net9.0
+/HinshitsuWorker/obj
+/HinshitsuWorker/.vs/HinshitsuWorker

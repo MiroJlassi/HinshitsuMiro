@@ -1,5 +1,6 @@
-using HinshitsuService.Services;
+using HinshitsuWebApis.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using HinshitsuService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,8 @@ builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<EmailService>();
 builder.Services.AddSingleton<JwtService>();
 builder.Services.AddSingleton<TaskService>();
+builder.Services.AddSingleton<AnalysisJobService>();
+builder.Services.AddSingleton(sp => new QueueService(builder.Configuration["AzureStorage:ConnectionString"]!));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
