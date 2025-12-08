@@ -12,7 +12,11 @@ class ScreenshotService {
     }
 
     async capture(url) {
-        const browser = await playwright.chromium.launch({ headless: true });
+        // miro we have to check for available/already installed chrome instance
+        const browser = await playwright.chromium.launch({ 
+            headless: true,
+            executablePath: '/usr/bin/chromium'
+        });
         const page = await browser.newPage();
         
         try {
@@ -41,7 +45,11 @@ class ScreenshotService {
             await page.setViewportSize({ width: size.width, height: size.height });
 
             const screenshotPath = path.join('screenshots', `${size.name}.png`);
-            await page.screenshot({ path: screenshotPath, fullPage: true });
+            await page.screenshot({ 
+                path: screenshotPath, 
+                fullPage: true,
+                timeout: 60000
+            });
 
             const domContent = await page.content();
             const domJSON = await this.extractDOMStructure(page);

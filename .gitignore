@@ -26,3 +26,5 @@ PerfoCheckProject/.env
 /HinshitsuWorker/bin/Debug/net9.0
 /HinshitsuWorker/obj
 /HinshitsuWorker/.vs/HinshitsuWorker
+/HinshitsuService/HinshitsuWebApis/.vs
+/HinshitsuWorker/.vs/HinshitsuWorker

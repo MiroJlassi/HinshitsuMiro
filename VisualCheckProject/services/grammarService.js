@@ -11,6 +11,13 @@ class GrammarService {
     }
 
     async checkContent(domContent) {
+        if (!domContent) {
+            return {
+                score: 10,
+                issues: [],
+                summary: 'No content to analyze'
+            };
+        }
         const textContent = this.extractTextFromDOM(domContent);
 
         const prompt = `
@@ -43,7 +50,19 @@ IMPORTANT: Limit to the 3 most critical issues only.
         });
 
         const output = response.choices[0].message.content;
-        return JSON.parse(output);
+        
+        const cleaned = output.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        
+        try {
+            return JSON.parse(cleaned);
+        } catch (err) {
+            console.error('Failed to parse grammar check response:', cleaned);
+            return {
+                score: 5,
+                issues: [],
+                summary: 'Unable to parse grammar analysis'
+            };
+        }
     }
 
     extractTextFromDOM(domContent) {

@@ -10,6 +10,24 @@ const siteReviewService = require('./services/siteReviewService');
 const app = express();
 app.use(express.json());
 
+// Health check endpoint
+app.get('/', (req, res) => {
+    res.json({ 
+        status: 'healthy',
+        service: 'UI/UX Visual Analyzer',
+        version: '1.0.0',
+        timestamp: new Date().toISOString()
+    });
+});
+
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'healthy',
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString()
+    });
+});
+
 app.post('/analyze', async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: 'Missing URL' });
