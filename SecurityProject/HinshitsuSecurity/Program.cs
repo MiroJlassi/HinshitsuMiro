@@ -7,8 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOptions<AzureOpenAIOptions>()
     .Bind(builder.Configuration.GetSection(AzureOpenAIOptions.SectionName))
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
+    .ValidateDataAnnotations();
 
 // HttpClient 
 builder.Services.AddHttpClient<ISecurityHeadersAnalyzer, SecurityHeadersAnalyzer>()
