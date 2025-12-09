@@ -1,0 +1,31 @@
+<div class="container">
+  <div class="card">
+    <h1>Verify Code</h1>
+    <p class="email">{{ email }}</p>
+
+    <form (ngSubmit)="onSubmit()">
+      <input
+        type="text"
+        [(ngModel)]="code"
+        name="code"
+        placeholder="Enter code"
+        maxlength="6"
+        required
+        [disabled]="loading"
+        class="code-input"
+      />
+
+      <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+      <button type="submit" [disabled]="loading">
+        {{ loading ? 'Verifying...' : 'Verify' }}
+      </button>
+
+      <button type="button" class="btn-link" (click)="resendCode()" [disabled]="loading">
+        Resend Code
+      </button>
+
+      <p class="link"><a routerLink="/login">← Back to Sign In</a></p>
+    </form>
+  </div>
+</div>
