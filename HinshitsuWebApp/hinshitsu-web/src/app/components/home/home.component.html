@@ -1,0 +1,57 @@
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-content">
+      <div class="sidebar-header">
+        <button class="toggle-sidebar" (click)="toggleSidebar()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+        <h2 *ngIf="!sidebarCollapsed">Hinshitsu</h2>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="user-avatar">{{ sidebarCollapsed ? userInitials.charAt(0) : userInitials }}</div>
+          <div *ngIf="!sidebarCollapsed" class="user-info">
+            <span class="user-name">{{ userName }}</span>
+            <button class="logout-btn" (click)="logout()">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Chat Area -->
+    <div class="chat-container">
+      <div class="messages" *ngIf="messages.length > 0">
+        <div *ngFor="let message of messages" class="message" [class.user-message]="message.isUser" [class.bot-message]="!message.isUser">
+          <div class="message-content">{{ message.content }}</div>
+        </div>
+      </div>
+      <div class="loading" *ngIf="isLoading">
+        <span>Processing...</span>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-container">
+      <div class="input-wrapper">
+        <textarea
+          [(ngModel)]="userMessage"
+          (keydown.enter)="$event.preventDefault(); sendMessage()"
+          placeholder="Message Hinshitsu..."
+          rows="1"
+        ></textarea>
+        <button class="send-btn" (click)="sendMessage()" [disabled]="!userMessage.trim()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </main>
+</div>
