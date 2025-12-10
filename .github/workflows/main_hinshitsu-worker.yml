@@ -28,14 +28,25 @@ jobs:
         working-directory: ./HinshitsuWorker
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{github.workspace}}/myapp
+        run: dotnet publish -c Release -o ${{github.workspace}}/publish
         working-directory: ./HinshitsuWorker
+
+      - name: Create run.cmd for WebJob
+        run: |
+          echo "dotnet HinshitsuWorker.dll" > ${{github.workspace}}/publish/run.cmd
+        shell: pwsh
+
+      - name: Create WebJob package structure
+        run: |
+          New-Item -ItemType Directory -Force -Path "${{github.workspace}}/webjob/App_Data/jobs/continuous/hinshitsu-worker"
+          Copy-Item -Path "${{github.workspace}}/publish/*" -Destination "${{github.workspace}}/webjob/App_Data/jobs/continuous/hinshitsu-worker/" -Recurse
+        shell: pwsh
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{github.workspace}}/myapp
+          path: ${{github.workspace}}/webjob
 
   deploy:
     runs-on: windows-latest
