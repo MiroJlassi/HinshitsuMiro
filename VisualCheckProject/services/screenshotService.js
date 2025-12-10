@@ -22,14 +22,14 @@ class ScreenshotService {
         try {
             await page.goto(url, { 
                 waitUntil: 'networkidle', 
-                timeout: 60000 
+                timeout: 120000 
             });
         } catch (err) {
             // Fallback to 'load' if 'networkidle' times out
             console.log('Network idle timeout, falling back to load event...');
             await page.goto(url, { 
                 waitUntil: 'load', 
-                timeout: 30000 
+                timeout: 60000 
             });
         }
         
@@ -48,7 +48,7 @@ class ScreenshotService {
             await page.screenshot({ 
                 path: screenshotPath, 
                 fullPage: true,
-                timeout: 60000
+                timeout: 120000
             });
 
             const domContent = await page.content();
@@ -75,7 +75,7 @@ class ScreenshotService {
                     children: [],
                     text: node.innerText || '',
                     id: node.id || '',
-                    classList: node.className ? node.className.split(' ') : [],
+                    classList: typeof node.className === 'string' ? node.className.split(' ') : [],
                     styles: node.style ? node.style.cssText : ''
                 };
                 if (node.children) {
