@@ -1,0 +1,288 @@
+<div class="results-container" *ngIf="results">
+  <!-- Warning for Failed Tasks -->
+  <div class="warning-section" *ngIf="getAvailableResultsCount() < 3 && getAvailableResultsCount() > 0">
+    <div class="warning-banner">
+      ⚠️ {{ getFailedTasksMessage() }}. Showing available results ({{ getAvailableResultsCount() }} of 3 tasks completed).
+    </div>
+  </div>
+
+  <!-- Error if All Tasks Failed -->
+  <div class="error-section" *ngIf="getAvailableResultsCount() === 0">
+    <div class="error-banner">
+      ❌ All analysis tasks failed. Please try again with a different URL or contact support.
+    </div>
+  </div>
+
+  <!-- PDF Download Section -->
+  <div class="pdf-section" *ngIf="hasAnyResults()">
+    <button class="pdf-btn" *ngIf="results.pdfReportUrl" (click)="downloadPdf()">
+      📄 Download PDF Report
+    </button>
+    <button class="pdf-btn" *ngIf="!results.pdfReportUrl" (click)="generatePdfReport()">
+      📄 Generate PDF Report
+    </button>
+  </div>
+
+  <!-- Security Section -->
+  <div class="accordion-section" *ngIf="results.security">
+    <button class="section-header" (click)="toggleSection('security')" type="button">
+      <div class="header-content">
+        <span class="section-icon">🔒</span>
+        <h2>Security Analysis</h2>
+        <div class="header-summary" *ngIf="results.security.structuredAnalysis?.summary as securitySummary">
+          <span class="badge" [style.background-color]="getGradeColor(securitySummary.grade)">
+            {{ securitySummary.grade }}
+          </span>
+          <span class="badge" [style.background-color]="getRiskLevelColor(securitySummary.riskLevel)">
+            {{ securitySummary.riskLevel }}
+          </span>
+        </div>
+      </div>
+      <span class="collapse-icon">{{ securityCollapsed ? '▼' : '▲' }}</span>
+    </button>
+    
+    <div class="section-body" [class.collapsed]="securityCollapsed">
+      <!-- Security Summary -->
+      <div class="summary-row" *ngIf="results.security.structuredAnalysis?.summary as securitySummary">
+        <div class="summary-item">
+          <span class="label">Configured Headers</span>
+          <span class="value success">{{ securitySummary.configuredHeaders }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Missing Headers</span>
+          <span class="value danger">{{ securitySummary.missingHeaders }}</span>
+        </div>
+      </div>
+
+      <!-- Security Headers -->
+      <div class="content-block" *ngIf="results.security.securityHeaders">
+        <h3>Security Headers</h3>
+        <div class="items-list">
+          <div *ngFor="let header of results.security.securityHeaders | keyvalue" 
+               class="list-item"
+               [class.success]="header.value.present"
+               [class.danger]="!header.value.present"
+               [title]="getHeaderTooltip(header.key)">
+            <span class="status-icon">{{ header.value.present ? '✓' : '✗' }}</span>
+            <div class="item-details">
+              <div class="item-name">{{ header.key }}</div>
+              <div class="item-value" *ngIf="header.value.present">{{ header.value.value }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overall Assessment -->
+      <div class="content-block" *ngIf="results.security.structuredAnalysis?.summary as securitySummary">
+        <h3>Overall Assessment</h3>
+        <p class="text-content" *ngIf="securitySummary.overallAssessment">{{ securitySummary.overallAssessment }}</p>
+      </div>
+
+      <!-- Issues -->
+      <div class="content-block" *ngIf="results.security.structuredAnalysis?.issuesAndRisks as issues">
+        <ng-container *ngIf="issues.length > 0">
+          <h3>Issues & Risks</h3>
+          <div class="issues-list">
+            <div class="issue-card" *ngFor="let issue of issues">
+              <div class="issue-title">{{ issue.header }}</div>
+              <span class="severity-badge" [class]="'severity-' + issue.risk.toLowerCase()">{{ issue.risk }}</span>
+              <p class="issue-text">{{ issue.issue }}</p>
+              <ul class="attack-vectors" *ngIf="issue.attackVectors && issue.attackVectors.length > 0">
+                <li *ngFor="let vector of issue.attackVectors">{{ vector }}</li>
+              </ul>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="content-block" *ngIf="results.security.structuredAnalysis?.recommendations as recommendations">
+        <ng-container *ngIf="recommendations.length > 0">
+          <h3>Recommendations</h3>
+          <ul class="recommendations-list">
+            <li *ngFor="let rec of recommendations">{{ rec }}</li>
+          </ul>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance Section -->
+  <div class="accordion-section" *ngIf="results.performance">
+    <button class="section-header" (click)="toggleSection('performance')" type="button">
+      <div class="header-content">
+        <span class="section-icon">⚡</span>
+        <h2>Performance Analysis</h2>
+        <div class="header-summary" *ngIf="results.performance.lighthouseScore">
+          <span class="score-badge">{{ (results.performance.lighthouseScore.performance * 100).toFixed(0) }}</span>
+          <span class="score-badge">{{ (results.performance.lighthouseScore.accessibility * 100).toFixed(0) }}</span>
+          <span class="score-badge">{{ (results.performance.lighthouseScore.seo * 100).toFixed(0) }}</span>
+        </div>
+      </div>
+      <span class="collapse-icon">{{ performanceCollapsed ? '▼' : '▲' }}</span>
+    </button>
+    
+    <div class="section-body" [class.collapsed]="performanceCollapsed">
+      <!-- Lighthouse Scores -->
+      <div class="content-block" *ngIf="results.performance.lighthouseScore">
+        <h3>Lighthouse Scores</h3>
+        <div class="scores-grid">
+          <div class="score-item" [title]="getLighthouseTooltip('performance')">
+            <div class="score-circle" [style.border-color]="getScoreColor(results.performance.lighthouseScore.performance)">
+              <span>{{ (results.performance.lighthouseScore.performance * 100).toFixed(0) }}</span>
+            </div>
+            <div class="score-name">Performance</div>
+          </div>
+          <div class="score-item" [title]="getLighthouseTooltip('accessibility')">
+            <div class="score-circle" [style.border-color]="getScoreColor(results.performance.lighthouseScore.accessibility)">
+              <span>{{ (results.performance.lighthouseScore.accessibility * 100).toFixed(0) }}</span>
+            </div>
+            <div class="score-name">Accessibility</div>
+          </div>
+          <div class="score-item" [title]="getLighthouseTooltip('seo')">
+            <div class="score-circle" [style.border-color]="getScoreColor(results.performance.lighthouseScore.seo)">
+              <span>{{ (results.performance.lighthouseScore.seo * 100).toFixed(0) }}</span>
+            </div>
+            <div class="score-name">SEO</div>
+          </div>
+          <div class="score-item" [title]="getLighthouseTooltip('bestPractices')">
+            <div class="score-circle" [style.border-color]="getScoreColor(results.performance.lighthouseScore.bestPractices)">
+              <span>{{ (results.performance.lighthouseScore.bestPractices * 100).toFixed(0) }}</span>
+            </div>
+            <div class="score-name">Best Practices</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Details -->
+      <div class="content-block" *ngFor="let cat of getPerformanceCategories()">
+        <div class="category-title">
+          <h3>{{ cat.name }}</h3>
+          <span class="priority-tag" [style.background-color]="getPriorityColor(cat.data.priority)">
+            {{ cat.data.priority }}
+          </span>
+        </div>
+        <p class="text-content">{{ cat.data.summary }}</p>
+        <p class="text-content subtle" *ngIf="cat.data.scoreInterpretation">{{ cat.data.scoreInterpretation }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- UI/UX Section -->
+  <div class="accordion-section" *ngIf="results.uiUx">
+    <button class="section-header" (click)="toggleSection('uiux')" type="button">
+      <div class="header-content">
+        <span class="section-icon">🎨</span>
+        <h2>UI/UX Analysis</h2>
+        <div class="header-summary" *ngIf="results.uiUx.overallScore">
+          <span class="score-badge">{{ results.uiUx.overallScore }}</span>
+        </div>
+      </div>
+      <span class="collapse-icon">{{ uiuxCollapsed ? '▼' : '▲' }}</span>
+    </button>
+    
+    <div class="section-body" [class.collapsed]="uiuxCollapsed">
+      <!-- Overall Score -->
+      <div class="content-block highlight" *ngIf="results.uiUx.overallScore">
+        <div class="overall-score">
+          <h3>Overall Score</h3>
+          <div class="big-number">{{ results.uiUx.overallScore }}</div>
+        </div>
+      </div>
+
+      <!-- Responsiveness -->
+      <div class="content-block" *ngIf="getViewports().length > 0">
+        <h3>Responsiveness Analysis</h3>
+        <div class="viewport-list">
+          <div class="viewport-item" *ngFor="let viewport of getViewports()">
+            <h4>{{ viewport.name }}</h4>
+            <div class="scores-compact" *ngIf="viewport.data.scores">
+              <div class="score-row">
+                <span class="label">Accessibility</span>
+                <span class="value" [style.color]="getViewportScoreColor(viewport.data.scores.accessibility)">
+                  {{ viewport.data.scores.accessibility }}/10
+                </span>
+              </div>
+              <div class="score-row">
+                <span class="label">Semantic HTML</span>
+                <span class="value" [style.color]="getViewportScoreColor(viewport.data.scores.semanticHTML)">
+                  {{ viewport.data.scores.semanticHTML }}/10
+                </span>
+              </div>
+              <div class="score-row">
+                <span class="label">Navigation</span>
+                <span class="value" [style.color]="getViewportScoreColor(viewport.data.scores.navigation)">
+                  {{ viewport.data.scores.navigation }}/10
+                </span>
+              </div>
+              <div class="score-row">
+                <span class="label">Responsiveness</span>
+                <span class="value" [style.color]="getViewportScoreColor(viewport.data.scores.responsiveness)">
+                  {{ viewport.data.scores.responsiveness }}/10
+                </span>
+              </div>
+              <div class="score-row overall">
+                <span class="label">Overall</span>
+                <span class="value" [style.color]="getViewportScoreColor(viewport.data.scores.overall)">
+                  {{ viewport.data.scores.overall }}/10
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grammar -->
+      <div class="content-block" *ngIf="results.uiUx.grammar as grammar">
+        <h3>Grammar Analysis</h3>
+        <div class="grammar-row">
+          <div class="score-circle small" [style.border-color]="getViewportScoreColor(grammar.score)">
+            <span>{{ grammar.score }}/10</span>
+          </div>
+          <p class="text-content" *ngIf="grammar.summary">{{ grammar.summary }}</p>
+        </div>
+      </div>
+
+      <!-- Critical Issues -->
+      <div class="content-block" *ngIf="results.uiUx.criticalIssues as criticalIssues">
+        <ng-container *ngIf="criticalIssues.length > 0">
+          <h3>Critical Issues</h3>
+          <ul class="recommendations-list">
+            <li *ngFor="let issue of criticalIssues">{{ issue }}</li>
+          </ul>
+        </ng-container>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="content-block" *ngIf="results.uiUx.recommendations as recommendations">
+        <ng-container *ngIf="recommendations.length > 0">
+          <h3>Recommendations</h3>
+          <ul class="recommendations-list">
+            <li *ngFor="let rec of recommendations">{{ rec }}</li>
+          </ul>
+        </ng-container>
+      </div>
+
+      <!-- Encouragement -->
+      <div class="content-block encourage" *ngIf="results.uiUx.encouragement as encouragement">
+        <p class="encouragement-text">{{ encouragement }}</p>
+      </div>
+
+      <!-- Links -->
+      <div class="content-block" *ngIf="results.uiUx.links as links">
+        <ng-container *ngIf="links.length > 0">
+          <h3>Discovered Links ({{ links.length }})</h3>
+          <p class="subtle">Click any link to analyze it</p>
+          <div class="links-compact">
+            <button *ngFor="let link of links" 
+                    class="link-btn"
+                    (click)="analyzeLink(link.href || '')"
+                    [title]="link.title || link.href || ''">
+              🔗 {{ link.text || link.href }}
+            </button>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
