@@ -30,7 +30,7 @@ namespace HinshitsuWorker.Services
         {
             try
             {
-                _logger.LogInformation("Calling UI/UX microservice for {Url}", message.WebsiteUrl);
+
                 
                 // Send Started notification
                 await _notificationService.SendTaskProgressAsync(new TaskProgressNotification
@@ -52,8 +52,6 @@ namespace HinshitsuWorker.Services
                 var bsonDocument = BsonDocument.Parse(jsonString);
 
                 await _jobUpdateService.UpdateUiUxResultAsync(message.JobId!, bsonDocument, cancellationToken);
-
-                _logger.LogInformation("UI/UX check completed for JobId: {JobId}", message.JobId);
             }
             catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
             {

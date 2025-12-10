@@ -233,13 +233,11 @@ namespace HinshitsuWorker.Services
                 string finalStatus;
                 if (successCount > 0)
                 {
-                    finalStatus = "Completed"; // Job is considered complete if at least one task succeeded
-                    _logger.LogInformation("Job {JobId} completed with {SuccessCount} successful and {FailCount} failed tasks", 
-                        jobId, successCount, failCount);
+                    finalStatus = "Completed";
                 }
                 else
                 {
-                    finalStatus = "Failed"; // All tasks failed
+                    finalStatus = "Failed";
                     _logger.LogWarning("Job {JobId} failed - all tasks failed", jobId);
                 }
 
@@ -248,7 +246,6 @@ namespace HinshitsuWorker.Services
                     .Set("CompletedAt", DateTime.UtcNow);
 
                 await _jobs.UpdateOneAsync(j => j.Id == jobId, update, cancellationToken: cancellationToken);
-                _logger.LogInformation("Job {JobId} status updated to {Status}", jobId, finalStatus);
                 
                 // Send job completion notification
                 await _notificationService.SendJobCompletionAsync(new JobCompletionNotification

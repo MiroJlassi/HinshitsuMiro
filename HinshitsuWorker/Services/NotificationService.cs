@@ -28,12 +28,7 @@ namespace HinshitsuWorker.Services
                     notification,
                     cancellationToken);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    _logger.LogInformation("Task progress notification sent for JobId: {JobId}, Task: {TaskType}", 
-                        notification.JobId, notification.TaskType);
-                }
-                else
+                if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning("Failed to send task progress notification. Status: {StatusCode}", response.StatusCode);
                 }
@@ -54,12 +49,7 @@ namespace HinshitsuWorker.Services
                     notification,
                     cancellationToken);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    _logger.LogInformation("Job completion notification sent for JobId: {JobId}, Status: {Status}", 
-                        notification.JobId, notification.Status);
-                }
-                else
+                if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning("Failed to send job completion notification. Status: {StatusCode}", response.StatusCode);
                 }

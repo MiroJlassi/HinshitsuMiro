@@ -31,7 +31,7 @@ namespace HinshitsuWorker.Services
         {
             try
             {
-                _logger.LogInformation("Calling security microservice for {Url}", message.WebsiteUrl);
+
                 
                 // Send Started notification
                 await _notificationService.SendTaskProgressAsync(new TaskProgressNotification
@@ -53,8 +53,6 @@ namespace HinshitsuWorker.Services
                 var bsonDocument = BsonDocument.Parse(jsonString);
 
                 await _jobUpdateService.UpdateSecurityResultAsync(message.JobId!, bsonDocument, cancellationToken);
-
-                _logger.LogInformation("Security check completed for JobId: {JobId}", message.JobId);
             }
             catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
             {

@@ -34,6 +34,8 @@ namespace HinshitsuWorker.Services
 
             while (!stoppingToken.IsCancellationRequested)
             {
+                bool foundMessage = false;
+
                 foreach (var queueClient in queueClients)
                 {
                     try
@@ -44,6 +46,7 @@ namespace HinshitsuWorker.Services
 
                         if (messages != null && messages.Length > 0)
                         {
+                            foundMessage = true;
                             var message = messages[0];
                             await ProcessMessageAsync(queueClient.Name, message, stoppingToken);
                             await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
@@ -55,7 +58,9 @@ namespace HinshitsuWorker.Services
                     }
                 }
 
-                await Task.Delay(1000, stoppingToken); // Poll every second
+                // If no messages found, wait longer before polling again
+                var delayMs = foundMessage ? 500 : 5000;
+                await Task.Delay(delayMs, stoppingToken);
             }
         }
 
@@ -65,8 +70,6 @@ namespace HinshitsuWorker.Services
             {
                 var taskMessage = JsonSerializer.Deserialize<WorkerTaskMessage>(message.MessageText);
                 if (taskMessage == null) return;
-
-                _logger.LogInformation("Processing {TaskType} for JobId: {JobId}", taskMessage.TaskType, taskMessage.JobId);
 
                 using var scope = _serviceProvider.CreateScope();
                 
@@ -85,8 +88,6 @@ namespace HinshitsuWorker.Services
                         await uiuxHandler.ProcessAsync(taskMessage, cancellationToken);
                         break;
                 }
-
-                _logger.LogInformation("Completed {TaskType} for JobId: {JobId}", taskMessage.TaskType, taskMessage.JobId);
             }
             catch (Exception ex)
             {

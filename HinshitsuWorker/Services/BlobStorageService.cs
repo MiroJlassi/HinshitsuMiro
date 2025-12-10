@@ -26,8 +26,6 @@ namespace HinshitsuWorker.Services
                 await containerClient.CreateIfNotExistsAsync(
                     PublicAccessType.None, 
                     cancellationToken: cancellationToken);
-                
-                _logger.LogInformation("Container '{ContainerName}' is ready", ContainerName);
             }
             catch (Exception ex)
             {
@@ -75,11 +73,6 @@ namespace HinshitsuWorker.Services
                     stream, 
                     overwrite: true,
                     cancellationToken: cancellationToken);
-
-                _logger.LogInformation(
-                    "Saved {TaskType} analysis result to blob: {BlobPath}", 
-                    taskType, 
-                    blobPath);
             }
             catch (Exception ex)
             {
@@ -166,8 +159,6 @@ namespace HinshitsuWorker.Services
                 {
                     await containerClient.DeleteBlobAsync(blobItem.Name, cancellationToken: cancellationToken);
                 }
-
-                _logger.LogInformation("Deleted all results for JobId: {JobId}", jobId);
             }
             catch (Exception ex)
             {

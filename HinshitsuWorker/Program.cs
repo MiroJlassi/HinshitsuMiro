@@ -3,10 +3,17 @@ using HinshitsuWorker.Services;
 using Polly;
 using Polly.Extensions.Http;
 
+Console.WriteLine("========================================");
+Console.WriteLine($"HinshitsuWorker Starting... {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
+Console.WriteLine("========================================");
+
 var builder = Host.CreateApplicationBuilder(args);
+
+Console.WriteLine("Builder created. Configuring services...");
 
 // Add Application Insights telemetry
 builder.Services.AddApplicationInsightsTelemetryWorkerService();
+Console.WriteLine("Application Insights configured.");
 
 builder.Services.AddSingleton<QueueProcessor>();
 builder.Services.AddSingleton<JobUpdateService>();
@@ -52,5 +59,12 @@ builder.Services.AddHttpClient<UiUxCheckHandler>()
 
 builder.Services.AddHostedService<Worker>();
 
+Console.WriteLine("All services configured. Building host...");
+
 var host = builder.Build();
+
+Console.WriteLine("Host built. Starting worker service...");
+
 await host.RunAsync();
+
+Console.WriteLine("Worker service stopped.");

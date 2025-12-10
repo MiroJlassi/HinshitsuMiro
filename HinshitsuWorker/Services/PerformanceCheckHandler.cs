@@ -30,8 +30,7 @@ namespace HinshitsuWorker.Services
         {
             try
             {
-                _logger.LogInformation("Calling performance microservice for {Url} with timeout {Timeout}s", 
-                    message.WebsiteUrl, _httpClient.Timeout.TotalSeconds);
+
                 
                 // Send Started notification
                 await _notificationService.SendTaskProgressAsync(new TaskProgressNotification
@@ -53,8 +52,6 @@ namespace HinshitsuWorker.Services
                 var bsonDocument = BsonDocument.Parse(jsonString);
 
                 await _jobUpdateService.UpdatePerformanceResultAsync(message.JobId!, bsonDocument, cancellationToken);
-
-                _logger.LogInformation("Performance check completed for JobId: {JobId}", message.JobId);
             }
             catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
             {
