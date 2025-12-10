@@ -2,7 +2,7 @@ namespace HinshitsuWebApis.Models
 {
     public class SubmitAnalysisRequest
     {
-        public string WebsiteUrl { get; set; } = string.Empty;
+        public string Url { get; set; } = string.Empty;
     }
 
     public class SubmitAnalysisResponse
