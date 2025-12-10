@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface TaskProgressNotification {
   jobId: string;
@@ -38,7 +39,7 @@ export class SignalRService {
   private jobCompletedSubject = new BehaviorSubject<JobCompletionNotification | null>(null);
   public jobCompleted$ = this.jobCompletedSubject.asObservable();
 
-  private serviceUrl = 'https://localhost:7170'; // Update with your service URL
+  private serviceUrl = environment.apiUrl;
 
   constructor() {}
 

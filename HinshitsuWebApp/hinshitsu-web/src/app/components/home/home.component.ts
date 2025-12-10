@@ -8,6 +8,7 @@ import { SignalRService, TaskProgressNotification, JobCompletionNotification } f
 import { Subscription } from 'rxjs';
 import { ResultsComponent } from '../results/results.component';
 import { AnalysisSummary } from '../../models/analysis-results';
+import { environment } from '../../../environments/environment';
 
 interface Message {
   content: string;
@@ -42,7 +43,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   userInitials = 'JD';
   messages: Message[] = [];
   isLoading = false;
-  private readonly apiUrl = 'https://localhost:7170/api';
+  private readonly apiUrl = `${environment.apiUrl}/api`;
   
   // SignalR and Task Tracking
   currentJobId: string | null = null;
