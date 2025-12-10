@@ -10,6 +10,24 @@ builder.Services.AddSingleton<JwtService>();
 builder.Services.AddSingleton<TaskService>();
 builder.Services.AddSingleton<AnalysisJobService>();
 builder.Services.AddSingleton(sp => new QueueService(builder.Configuration["AzureStorage:ConnectionString"]!));
+builder.Services.AddSingleton(sp => new BlobStorageService(
+    builder.Configuration["AzureStorage:ConnectionString"]!,
+    sp.GetRequiredService<ILogger<BlobStorageService>>()));
+builder.Services.AddScoped<ResultsSummaryService>();
+builder.Services.AddScoped<PdfReportService>();
+
+builder.Services.AddSignalR();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.SetIsOriginAllowed(origin => true)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
 
 builder.Services.AddCors(options =>
 {
@@ -56,5 +74,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Map SignalR hub for real-time notifications
+app.MapHub<HinshitsuWebApis.Hubs.NotificationHub>("/hubs/notifications");
 
 await app.RunAsync();
