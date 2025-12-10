@@ -1,27 +1,9 @@
 <div class="app-container">
-  <!-- Sidebar -->
-  <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
-    <div class="sidebar-content">
-      <div class="sidebar-header">
-        <button class="toggle-sidebar" (click)="toggleSidebar()">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-          </svg>
-        </button>
-        <h2 *ngIf="!sidebarCollapsed">Hinshitsu</h2>
-      </div>
-
-      <div class="sidebar-footer">
-        <div class="user-profile">
-          <div class="user-avatar">{{ sidebarCollapsed ? userInitials.charAt(0) : userInitials }}</div>
-          <div *ngIf="!sidebarCollapsed" class="user-info">
-            <span class="user-name">{{ userName }}</span>
-            <button class="logout-btn" (click)="logout()">Logout</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </aside>
+  <!-- Top Navigation -->
+  <header class="top-nav">
+    <h1 class="app-title">Hinshitsu-Miro</h1>
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </header>
 
   <!-- Main Content -->
   <main class="main-content">
@@ -29,12 +11,80 @@
     <div class="chat-container">
       <div class="messages" *ngIf="messages.length > 0">
         <div *ngFor="let message of messages" class="message" [class.user-message]="message.isUser" [class.bot-message]="!message.isUser">
-          <div class="message-content">{{ message.content }}</div>
+          <div class="message-content">
+            <span *ngIf="!message.isUser && message.isTyping">{{ message.displayContent }}<span class="typing-cursor">|</span></span>
+            <span *ngIf="!message.isUser && !message.isTyping">{{ message.content }}</span>
+            <span *ngIf="message.isUser">{{ message.content }}</span>
+          </div>
+        </div>
+        
+        <!-- Task Progress Panel - appears after messages -->
+        <div class="task-progress-panel" *ngIf="currentJobId">
+          <div class="task-progress-header">
+            <div class="progress-title">
+              <div class="spinner-small" *ngIf="!isJobComplete"></div>
+              <span *ngIf="!isJobComplete">Processing your request...</span>
+              <span *ngIf="isJobComplete" class="completed-icon">✓</span>
+              <span *ngIf="isJobComplete">Analysis Complete</span>
+            </div>
+            <span class="progress-subtitle" *ngIf="!isJobComplete">Please wait while we analyze the URL</span>
+            <span class="progress-subtitle total-time" *ngIf="isJobComplete">
+              Total Processing Time: <strong>{{ totalProcessingTime.toFixed(2) }}s</strong>
+            </span>
+          </div>
+          <div class="task-items">
+            <div class="task-item" 
+                 [class.pending]="taskProgress.security === 'Pending'"
+                 [class.started]="taskProgress.security === 'Started'"
+                 [class.completed]="taskProgress.security === 'Completed'" 
+                 [class.failed]="taskProgress.security === 'Failed'">
+              <div class="task-indicator">
+                <div class="spinner" *ngIf="taskProgress.security === 'Started'"></div>
+              </div>
+              <span class="task-label">Security Check</span>
+              <span class="task-time" *ngIf="taskTimings.security > 0">{{ taskTimings.security.toFixed(2) }}s</span>
+              <span class="task-status">{{ taskProgress.security }}</span>
+            </div>
+            <div class="task-item" 
+                 [class.pending]="taskProgress.performance === 'Pending'"
+                 [class.started]="taskProgress.performance === 'Started'"
+                 [class.completed]="taskProgress.performance === 'Completed'" 
+                 [class.failed]="taskProgress.performance === 'Failed'">
+              <div class="task-indicator">
+                <div class="spinner" *ngIf="taskProgress.performance === 'Started'"></div>
+              </div>
+              <span class="task-label">Performance Check</span>
+              <span class="task-time" *ngIf="taskTimings.performance > 0">{{ taskTimings.performance.toFixed(2) }}s</span>
+              <span class="task-status">{{ taskProgress.performance }}</span>
+            </div>
+            <div class="task-item" 
+                 [class.pending]="taskProgress.uiux === 'Pending'"
+                 [class.started]="taskProgress.uiux === 'Started'"
+                 [class.completed]="taskProgress.uiux === 'Completed'" 
+                 [class.failed]="taskProgress.uiux === 'Failed'">
+              <div class="task-indicator">
+                <div class="spinner" *ngIf="taskProgress.uiux === 'Started'"></div>
+              </div>
+              <span class="task-label">UI/UX Check</span>
+              <span class="task-time" *ngIf="taskTimings.uiux > 0">{{ taskTimings.uiux.toFixed(2) }}s</span>
+              <span class="task-status">{{ taskProgress.uiux }}</span>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="loading" *ngIf="isLoading">
+      <div class="loading" *ngIf="isLoading && !currentJobId">
+        <div class="spinner"></div>
         <span>Processing...</span>
       </div>
+
+      <!-- Analysis Results -->
+      <app-results 
+        *ngIf="analysisResults && isJobComplete"
+        [results]="analysisResults"
+        [jobId]="currentJobId"
+        (linkSelected)="onLinkSelected($event)"
+        (pdfRequested)="onPdfRequested($event)">
+      </app-results>
     </div>
 
     <!-- Input Area -->
