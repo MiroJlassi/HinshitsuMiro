@@ -37,3 +37,14 @@ PerfoCheckProject/.env
 /SecurityProject/CONSUMER_EXAMPLES.md
 /exp.json
 /PDF_GENERATION_GUIDE.md
+/HinshitsuWorker/appsettings.Development.json
+/HinshitsuWorker/appsettings.json
+/HinshitsuWorker/API_RESPONSE_EXAMPLES.json
+/HinshitsuWorker/CONSUMER_EXAMPLES.md
+/HinshitsuWorker/DEPLOYMENT_CHECKLIST.md
+/HinshitsuWorker/IMPLEMENTATION_SUMMARY.md
+/HinshitsuWorker/NOTIFICATION_ARCHITECTURE.md
+/HinshitsuWorker/README.md
+/HinshitsuWorker/SERVICE_IMPLEMENTATION.md
+/HinshitsuWorker/SYSTEM_DIAGRAM.md
+/HinshitsuWorker/WEBAPP_IMPLEMENTATION.md
