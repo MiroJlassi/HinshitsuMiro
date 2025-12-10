@@ -5,6 +5,9 @@ using Polly.Extensions.Http;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+// Add Application Insights telemetry
+builder.Services.AddApplicationInsightsTelemetryWorkerService();
+
 builder.Services.AddSingleton<QueueProcessor>();
 builder.Services.AddSingleton<JobUpdateService>();
 builder.Services.AddSingleton<BlobStorageService>();
